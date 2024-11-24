@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 dotenv.config();
 
 export interface IUser extends Document {
-  userName: string;
+  username: string;
   email: string;
   password: string;
   refreshToken: string;
@@ -16,7 +16,7 @@ export interface IUser extends Document {
 
 const UserSchema: Schema<IUser> = new Schema(
   {
-    userName: {
+    username: {
       type: String,
       required: true,
       unique: true,
@@ -42,7 +42,7 @@ const UserSchema: Schema<IUser> = new Schema(
 
 UserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return;
-  this.password = bycryptjs.hashSync(this.password, process.env.SALT_ROUND);
+  this.password = bycryptjs.hashSync(this.password, parseInt(process.env.SALT_ROUND!));
   next();
 });
 
@@ -54,7 +54,7 @@ UserSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {
       _id: this._id,
-      userName: this.userName,
+      username: this.username,
       email: this.email,
     },
     (process.env.JWT_ACCESS_TOKEN_SECRET as string)!,
